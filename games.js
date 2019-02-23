@@ -22,6 +22,27 @@ function createGames() {
         };
     }
 
+    function alternatingDelayedReward() {
+
+        let round = 0;
+        let lastReward = false;
+
+        function move(answer) {
+            const reward = lastReward;
+            lastReward = answer == (round % 2 == 0 ? State.LIGHT : State.DARK);
+            return {
+                correct : reward,
+                nextQuestion : (++round % 2 == 0 ? State.LIGHT : State.DARK)
+            };
+        }
+
+        return {
+            name : 'Alternating / Delayed Reward',
+            move : move
+        };
+    }
+
+
     function inverseAlternating() {
 
         let round = 0;
