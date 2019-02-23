@@ -18,6 +18,7 @@ function init() {
     let currentGame;
     let consecutiveCorrect;
     let tries;
+    let stats;
     
     function start() {
         const games = createGames();
@@ -28,6 +29,24 @@ function init() {
         result.innerText = 'Press a button';
         question.className = State.LIGHT;
         startPanel.style = "visibility : hidden";
+        stats = {
+            userId : getUserId(),
+            game : currentGame.name,
+            start : Date.now(),
+            moves : []
+        };
+    }
+
+    function getUserId() {
+        let userId = window.localStorage.getItem("user-id");
+        if (!userId) {
+            var rnd = new Uint32Array(8);
+            window.crypto.getRandomValues(rnd);
+            userId = Array.from(rnd).map(x => x.toString(16)).join("");
+            window.localStorage.setItem("user-id", userId);
+        }
+        return userId;
+
     }
 
     function end() {
@@ -37,16 +56,27 @@ function init() {
         startPanelText.innerHTML = "You've completed the game in <em>"+tries+"</em> moves.";
         startPanel.style = "visibility : visible";
         currentGame = null;
+        console.log(stats);
+        stats = null;
     }
 
 
-    
+    function recordMove(answer, correct) {
+        let time = Date.now() - stats.start;
+        stats.moves.push({
+            time : time,
+            question : question.className,
+            answer : answer,
+            correct : correct
+        });
+    }
 
     function respond(answer) {
         if (!currentGame)
             return;
         const next = currentGame.move(answer);
         result.innerText = next.correct ? "Correct" : "Incorrect";
+        recordMove(answer, next.correct);
         tries++;
         if (next.correct) {
             if (++consecutiveCorrect >= RECOGNITION_THRESHOLD) {
