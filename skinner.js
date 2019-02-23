@@ -30,6 +30,7 @@ function init() {
         question.className = State.LIGHT;
         startPanel.style = "visibility : hidden";
         stats = {
+            gameId : randomString(),
             userId : getUserId(),
             game : currentGame.name,
             start : Date.now(),
@@ -40,13 +41,16 @@ function init() {
     function getUserId() {
         let userId = window.localStorage.getItem("user-id");
         if (!userId) {
-            var rnd = new Uint32Array(8);
-            window.crypto.getRandomValues(rnd);
-            userId = Array.from(rnd).map(x => x.toString(16)).join("");
+            userId = randomString();
             window.localStorage.setItem("user-id", userId);
         }
         return userId;
+    }
 
+    function randomString() {
+        var rnd = new Uint32Array(8);
+        window.crypto.getRandomValues(rnd);
+        return Array.from(rnd).map(x => x.toString(16)).join("");
     }
 
     function end() {
@@ -57,9 +61,22 @@ function init() {
         startPanel.style = "visibility : visible";
         currentGame = null;
         console.log(stats);
+        sendStats();
         stats = null;
     }
 
+    function sendStats() {
+        if (window._skinnerApiURL) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", window._skinnerApiURL, true);
+            xhr.onreadystatechange = function() { // Call a function when the state changes.
+                if (this.readyState === XMLHttpRequest.DONE) {
+                    console.log('Stat sent, status.', this.status);
+                }
+            }
+            xhr.send(JSON.stringify(stats));
+        }
+    }
 
     function recordMove(answer, correct) {
         let time = Date.now() - stats.start;
