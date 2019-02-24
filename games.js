@@ -42,6 +42,26 @@ function createGames() {
         };
     }
 
+    function randomisedDelayedReward() {
+
+        let current = State.LIGHT;
+        let lastReward = false;
+
+        function move(answer) {
+            const reward = lastReward;
+            lastReward = answer == current;
+            return {
+                correct : reward,
+                nextQuestion : current = (Math.random() > 0.5 ? State.LIGHT : State.DARK)
+            };
+        }
+
+        return {
+            name : 'Randomised / Delayed Reward',
+            move : move
+        };
+    }
+
 
     function inverseAlternating() {
 
@@ -102,6 +122,8 @@ function createGames() {
         inverseAlternating,
         alternating,
         delayedAnswer,
-        randomised
+        randomised,
+        alternatingDelayedReward,
+        randomisedDelayedReward
     ];
 }
